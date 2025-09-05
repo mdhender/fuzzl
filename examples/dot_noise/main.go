@@ -1,10 +1,17 @@
-// dotnoise_plot.go
-//
 // Example program to visualize fuzzl.DotNoise across a 2D plane
 // using the gg (github.com/fogleman/gg) package.
+//
+// Usage:
+//
+//  go run ./examples/dot_noise                  # grayscale (default)
+//  go run ./examples/dot_noise -heatmap         # heatmap coloring
+//  go run ./examples/dot_noise -z 5.0           # grayscale at z=5.0
+//  go run ./examples/dot_noise -z 2.5 -heatmap  # heatmap at z=2.5
+
 package main
 
 import (
+	"flag"
 	"log"
 	"math"
 
@@ -13,11 +20,14 @@ import (
 )
 
 func main() {
+	heatmap := flag.Bool("heatmap", false, "render using a heatmap instead of grayscale")
+	z := flag.Float64("z", 0.0, "z-slice coordinate for the noise field")
+	flag.Parse()
+
 	const (
 		width  = 512
 		height = 512
 		scale  = 0.05 // controls zoom
-		z      = 0.0  // fixed z slice
 	)
 
 	dc := gg.NewContext(width, height)
@@ -27,7 +37,7 @@ func main() {
 			// Map pixel coordinates to noise coordinates
 			px := (float64(x) - width/2) * scale
 			py := (float64(y) - height/2) * scale
-			p := fuzzl.Vec3{px, py, z}
+			p := fuzzl.Vec3{px, py, *z}
 
 			v := fuzzl.DotNoise(p)
 
@@ -35,14 +45,43 @@ func main() {
 			norm := (v + 3.0) / 6.0
 			norm = math.Max(0, math.Min(1, norm)) // clamp
 
-			// Draw pixel
-			gray := norm
-			dc.SetRGB(gray, gray, gray)
+			if *heatmap {
+				r, g, b := hsvToRGB(norm*360.0, 1.0, 1.0)
+				dc.SetRGB(r, g, b)
+			} else {
+				dc.SetRGB(norm, norm, norm)
+			}
 			dc.SetPixel(x, y)
 		}
 	}
 
-	if err := dc.SavePNG("testdata/dotnoise.png"); err != nil {
+	if err := dc.SavePNG("testdata/dot_noise.png"); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// hsvToRGB converts HSV to RGB (all in [0,1], hue in degrees).
+func hsvToRGB(h, s, v float64) (r, g, b float64) {
+	c := v * s
+	hh := h / 60.0
+	x := c * (1 - math.Abs(math.Mod(hh, 2)-1))
+	var rr, gg, bb float64
+
+	switch {
+	case hh >= 0 && hh < 1:
+		rr, gg, bb = c, x, 0
+	case hh >= 1 && hh < 2:
+		rr, gg, bb = x, c, 0
+	case hh >= 2 && hh < 3:
+		rr, gg, bb = 0, c, x
+	case hh >= 3 && hh < 4:
+		rr, gg, bb = 0, x, c
+	case hh >= 4 && hh < 5:
+		rr, gg, bb = x, 0, c
+	case hh >= 5 && hh < 6:
+		rr, gg, bb = c, 0, x
+	}
+
+	m := v - c
+	return rr + m, gg + m, bb + m
 }
