@@ -3,10 +3,12 @@
 //
 // Usage:
 //
-//  go run ./examples/dot_noise                  # grayscale (default)
-//  go run ./examples/dot_noise -heatmap         # heatmap coloring
-//  go run ./examples/dot_noise -z 5.0           # grayscale at z=5.0
-//  go run ./examples/dot_noise -z 2.5 -heatmap  # heatmap at z=2.5
+//  go run ./examples/dot_noise                      # grayscale (default)
+//  go run ./examples/dot_noise -heatmap             # heatmap coloring
+//  go run ./examples/dot_noise -z 5.0               # grayscale at z=5.0
+//  go run ./examples/dot_noise -z 2.5 -heatmap      # heatmap at z=2.5
+//  go run ./examples/dot_noise -scale 0.1           # zoom out (larger features)
+//  go run ./examples/dot_noise -z 2.5 -scale 0.02   # zoom in slice at z=2.5
 
 package main
 
@@ -22,12 +24,12 @@ import (
 func main() {
 	heatmap := flag.Bool("heatmap", false, "render using a heatmap instead of grayscale")
 	z := flag.Float64("z", 0.0, "z-slice coordinate for the noise field")
+	scale := flag.Float64("scale", 0.05, "zoom level (larger = zoom out, smaller = zoom in)")
 	flag.Parse()
 
 	const (
 		width  = 512
 		height = 512
-		scale  = 0.05 // controls zoom
 	)
 
 	dc := gg.NewContext(width, height)
@@ -35,8 +37,8 @@ func main() {
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			// Map pixel coordinates to noise coordinates
-			px := (float64(x) - width/2) * scale
-			py := (float64(y) - height/2) * scale
+			px := (float64(x) - width/2) * (*scale)
+			py := (float64(y) - height/2) * (*scale)
 			p := fuzzl.Vec3{px, py, *z}
 
 			v := fuzzl.DotNoise(p)
