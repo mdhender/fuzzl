@@ -3,12 +3,12 @@
 //
 // Usage:
 //
-//  go run ./examples/dot_noise                      # grayscale (default)
-//  go run ./examples/dot_noise -heatmap             # heatmap coloring
-//  go run ./examples/dot_noise -z 5.0               # grayscale at z=5.0
-//  go run ./examples/dot_noise -z 2.5 -heatmap      # heatmap at z=2.5
-//  go run ./examples/dot_noise -scale 0.1           # zoom out (larger features)
-//  go run ./examples/dot_noise -z 2.5 -scale 0.02   # zoom in slice at z=2.5
+//  go run ./examples/dot_noise_plot                      # grayscale (default)
+//  go run ./examples/dot_noise_plot -heatmap             # heatmap coloring
+//  go run ./examples/dot_noise_plot -z 5.0               # grayscale at z=5.0
+//  go run ./examples/dot_noise_plot -z 2.5 -heatmap      # heatmap at z=2.5
+//  go run ./examples/dot_noise_plot -scale 0.1           # zoom out (larger features)
+//  go run ./examples/dot_noise_plot -z 2.5 -scale 0.02   # zoom in slice at z=2.5
 
 package main
 
